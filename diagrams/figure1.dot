@@ -1,0 +1,24 @@
+// Figure 1 — Component & Data-Flow Architecture
+// Render: dot -Tpng figure1.dot -o figure1.png   (or paste into GraphvizOnline)
+digraph Fig1 {
+  rankdir=TB;
+  graph [nodesep=0.7, ranksep=0.8, fontname="Helvetica"];
+  node  [shape=box, style="rounded,filled", fillcolor="#DBE5F1",
+         color="#2E74B5", fontname="Helvetica", fontsize=11, margin="0.18,0.12"];
+  edge  [fontname="Helvetica", fontsize=10, color="#2E74B5"];
+
+  CLIENT  [label=<<b>CLIENT — Data Owner / User</b><br/>AES-256-GCM file encryption · DEK generation<br/>RSA-OAEP device-key wrap · RSA-PSS signing<br/>Final (light) CP-ABE decryption step>];
+  BACKEND [label=<<b>BACKEND — Flask REST API</b><br/>JWT authentication<br/>ABAC engine: PDP · PEP · PIP · PAP<br/>CP-ABE key-wrap · outsourced decryption<br/>Revocation: versioning + lazy DEK re-wrap>];
+  AA      [label=<<b>ATTRIBUTE AUTHORITY (AA)</b><br/>CP-ABE global setup<br/>Attribute-key issuance<br/>Key / attribute versioning>];
+  MONGO   [label=<<b>MongoDB — Metadata</b><br/>Access policies · wrapped keys<br/>Key versions · audit log>];
+  OBJ     [label=<<b>OBJECT STORE — AWS S3 / Azure Blob</b><br/>Encrypted file objects<br/>Accessed via presigned URLs>];
+
+  CLIENT  -> BACKEND [label="Upload: encrypted file + wrapped DEK"];
+  BACKEND -> CLIENT  [label="Download: transformed ciphertext", style=dashed, constraint=false];
+  AA      -> BACKEND [label="issues attribute keys"];
+  BACKEND -> MONGO   [label="persist metadata & wrapped keys"];
+  BACKEND -> OBJ     [label="persist encrypted objects"];
+
+  { rank=same; BACKEND; AA; }
+  { rank=same; MONGO; OBJ; }
+}

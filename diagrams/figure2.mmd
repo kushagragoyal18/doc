@@ -1,0 +1,16 @@
+%% Figure 2 — Three-Tier Key Hierarchy
+%% Render at https://mermaid.live  (Actions -> PNG/SVG)
+flowchart TB
+    F["<b>File (plaintext)</b>"]
+    DEK["<b>Data-Encryption Key (DEK)</b><br/>256-bit symmetric key"]
+    CPABE["<b>CP-ABE-wrapped DEK</b><br/>attribute-based authorisation"]
+    RSA["<b>RSA-wrapped DEK</b><br/>device / user binding"]
+    STORE["<b>Stored ciphertext + wrapped keys + signature</b>"]
+
+    F -->|"AES-256-GCM encryption"| DEK
+    DEK -->|"Tier 1 — wrap under CP-ABE access policy"| CPABE
+    CPABE -->|"Tier 2 — wrap under per-user RSA-OAEP public key"| RSA
+    RSA -->|"Tier 3 — SHA-256 + RSA-PSS signature (integrity)"| STORE
+
+    classDef box fill:#DBE5F1,stroke:#2E74B5,stroke-width:1.5px,color:#1F3864;
+    class F,DEK,CPABE,RSA,STORE box;
