@@ -1,0 +1,20 @@
+// Figure 2 — Three-Tier Key Hierarchy
+// Render: dot -Tpng figure2.dot -o figure2.png   (or paste into GraphvizOnline)
+digraph Fig2 {
+  rankdir=TB;
+  graph [ranksep=0.7, fontname="Helvetica"];
+  node  [shape=box, style="rounded,filled", fillcolor="#DBE5F1",
+         color="#2E74B5", fontname="Helvetica", fontsize=11, margin="0.22,0.14"];
+  edge  [fontname="Helvetica", fontsize=10, color="#2E74B5"];
+
+  F     [label=<<b>File (plaintext)</b>>];
+  DEK   [label=<<b>Data-Encryption Key (DEK)</b><br/>256-bit symmetric key>];
+  CPABE [label=<<b>CP-ABE-wrapped DEK</b><br/>attribute-based authorisation>];
+  RSA   [label=<<b>RSA-wrapped DEK</b><br/>device / user binding>];
+  STORE [label=<<b>Stored ciphertext + wrapped keys + signature</b>>];
+
+  F     -> DEK   [label="AES-256-GCM encryption"];
+  DEK   -> CPABE [label="Tier 1 — wrap under CP-ABE access policy"];
+  CPABE -> RSA   [label="Tier 2 — wrap under per-user RSA-OAEP public key"];
+  RSA   -> STORE [label="Tier 3 — SHA-256 + RSA-PSS signature (integrity)"];
+}

@@ -1,0 +1,19 @@
+%% Figure 1 — Component & Data-Flow Architecture
+%% Render at https://mermaid.live  (Actions -> PNG/SVG)
+flowchart TB
+    CLIENT["<b>CLIENT — Data Owner / User</b><br/>AES-256-GCM file encryption · DEK generation<br/>RSA-OAEP device-key wrap · RSA-PSS signing<br/>Final (light) CP-ABE decryption step"]
+
+    BACKEND["<b>BACKEND — Flask REST API</b><br/>JWT authentication<br/>ABAC engine: PDP · PEP · PIP · PAP<br/>CP-ABE key-wrap · outsourced decryption<br/>Revocation: versioning + lazy DEK re-wrap"]
+    AA["<b>ATTRIBUTE AUTHORITY (AA)</b><br/>CP-ABE global setup<br/>Attribute-key issuance<br/>Key / attribute versioning"]
+
+    MONGO["<b>MongoDB — Metadata</b><br/>Access policies · wrapped keys<br/>Key versions · audit log"]
+    OBJ["<b>OBJECT STORE — AWS S3 / Azure Blob</b><br/>Encrypted file objects<br/>Accessed via presigned URLs"]
+
+    CLIENT -->|"Upload: encrypted file + wrapped DEK"| BACKEND
+    BACKEND -.->|"Download: transformed ciphertext"| CLIENT
+    AA -->|"issues attribute keys"| BACKEND
+    BACKEND -->|"persist metadata & wrapped keys"| MONGO
+    BACKEND -->|"persist encrypted objects"| OBJ
+
+    classDef box fill:#DBE5F1,stroke:#2E74B5,stroke-width:1.5px,color:#1F3864;
+    class CLIENT,BACKEND,AA,MONGO,OBJ box;
